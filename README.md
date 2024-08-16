@@ -97,7 +97,7 @@ DATABASE_URL=mysql+pymysql://your_user:your_password@localhost/your_database
 ```sql
 CREATE DATABASE your_database;
 ```
-- **CRun database migrations:**
+- **Run database migrations:**
 
 ```bash
 alembic upgrade head
