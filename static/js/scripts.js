@@ -9,6 +9,7 @@ const limit = 10;
 async function fetchSongs(page) {
     const response = await fetch(`/api/v1/songs/?skip=${(page - 1) * limit}&limit=${limit}`);
     const songs = await response.json();
+    console.log("Songs", songs)
     return songs;
 }
 
@@ -18,18 +19,19 @@ async function renderSongs(page) {
 
     songs.forEach(song => {
         const row = document.createElement('tr');
+        console.log("Songs", song)
         row.innerHTML = `
-            <td>${song.id}</td>
-            <td>${song.title}</td>
-            <td>${song.danceability}</td>
-            <td>${song.energy}</td>
-            <td>${song.tempo}</td>
-            <td>${song.duration_ms}</td>
+            <td>${song.song.id}</td>
+            <td>${song.song.title}</td>
+            <td>${song.song.danceability}</td>
+            <td>${song.song.energy}</td>
+            <td>${song.song.tempo}</td>
+            <td>${song.song.duration_ms}</td>
             <td class="rating">
-                <input type="number" min="0" max="5" step="0.5" value="${song.star_rating}" data-id="${song.id}" onchange="enableSaveButton(this)">
+                <input type="number" min="0" max="5" step="0.5" value="${song.average_rating}" data-id="${song.id}" onchange="enableSaveButton(this)">
             </td>
             <td>
-                <button class="save-button" data-id="${song.id}" onclick="saveRating(this)" disabled>Save</button>
+                <button class="save-button" data-id="${song.song.id}" onclick="saveRating(this)" disabled>Save</button>
             </td>
         `;
         songTableBody.appendChild(row);
@@ -51,12 +53,14 @@ async function saveRating(buttonElement) {
     const inputElement = buttonElement.closest('tr').querySelector('input[type="number"]');
     const rating = inputElement.value;
 
-    const response = await fetch(`/api/v1/songs/${songId}/rate`, {
-        method: 'PUT',
+    console.log(songId, rating);
+
+    const response = await fetch(`/api/v1/ratings`, {
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ rating: parseFloat(rating) }),
+        body: JSON.stringify({ song_id: songId, star_rating: parseFloat(rating) }),
     });
 
     if (response.ok) {

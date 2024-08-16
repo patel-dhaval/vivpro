@@ -8,7 +8,6 @@ class SongBase(BaseModel):
     duration_ms: int
     num_sections: int
     num_segments: int
-    star_rating: float = 0.0
 
 class SongCreate(SongBase):
     pass
@@ -19,5 +18,27 @@ class Song(SongBase):
     class Config:
         from_attributes = True
 
+class SongWithRatings(BaseModel):
+    song: Song
+    average_rating: float
+    rating_count: int
+
+    class Config:
+        from_attributes = True
+
 class RatingUpdate(BaseModel):
     rating: float
+
+
+class RatingBase(BaseModel):
+    song_id: str
+    star_rating: float
+
+class RatingCreate(RatingBase):
+    pass
+
+class Rating(RatingBase):
+    id: int
+
+    class Config:
+        from_attributes = True

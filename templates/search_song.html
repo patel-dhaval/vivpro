@@ -3,13 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Song by Title</title>
+    <title>Search Songs</title>
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <h2>Search for a Song by Title</h2>
+    <h2>Search for Songs</h2>
     <div class="search-container">
-        <input type="text" id="songTitle" placeholder="Enter song title..." />
+        <div class="form-group">
+            <label for="songTitle">Title:</label>
+            <input type="text" id="songTitle" placeholder="Enter song title..." />
+        </div>
+        <div class="form-group">
+            <label for="danceability">Danceability:</label>
+            <input type="number" step="0.01" id="danceability" placeholder="Enter danceability..." />
+        </div>
+        <div class="form-group">
+            <label for="energy">Energy:</label>
+            <input type="number" step="0.01" id="energy" placeholder="Enter energy..." />
+        </div>
+        <div class="form-group">
+            <label for="tempo">Tempo:</label>
+            <input type="number" step="0.01" id="tempo" placeholder="Enter tempo..." />
+        </div>
         <button id="searchButton">Search</button>
     </div>
     <div id="songDetails" class="song-details"></div>

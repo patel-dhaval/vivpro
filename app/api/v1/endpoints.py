@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 import pandas as pd
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 import json
 from app import crud, schemas, db, models
 
@@ -28,9 +28,6 @@ async def upload_json(file: UploadFile = File(...), db: Session = Depends(get_db
         
         print(df)
 
-        if 'star_rating' not in df.columns:
-            df['star_rating'] = 0.0
-
         for _, row in df.iterrows():
             song = models.Song(
                 id=row['id'],
@@ -41,7 +38,6 @@ async def upload_json(file: UploadFile = File(...), db: Session = Depends(get_db
                 duration_ms=row['duration_ms'],
                 num_sections=row['num_sections'],
                 num_segments=row['num_segments'],
-                star_rating=row['star_rating']
             )
             db.add(song)
         db.commit()
@@ -52,7 +48,7 @@ async def upload_json(file: UploadFile = File(...), db: Session = Depends(get_db
         raise HTTPException(status_code=400, detail=f"An error occurred while processing the file: {e}")
 
 
-@router.get("/songs/", response_model=List[schemas.Song])
+@router.get("/songs/", response_model=List[schemas.SongWithRatings])
 def read_songs(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     """
     Retrieve all songs with pagination.
@@ -61,23 +57,35 @@ def read_songs(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     return songs
 
 
-@router.get("/songs/{title}", response_model=schemas.Song)
-def read_song(title: str, db: Session = Depends(get_db)):
+@router.get("/songs/search", response_model=List[schemas.Song])
+def search_songs(
+    title: Optional[str] = None,
+    danceability: Optional[float] = None,
+    energy: Optional[float] = None,
+    tempo: Optional[float] = None,
+    db: Session = Depends(get_db),
+):
     """
-    Retrieve a song by its title.
+    Search for songs based on various optional parameters.
     """
-    song = crud.get_song_by_title(db, title=title)
-    if song is None:
-        raise HTTPException(status_code=404, detail="Song not found")
-    return song
+    songs = crud.search_songs(
+        db,
+        title=title,
+        danceability=danceability,
+        energy=energy,
+        tempo=tempo,
+    )
+    
+    if not songs:
+        raise HTTPException(status_code=404, detail="No songs found")
+    
+    return songs
 
 
-@router.put("/songs/{song_id}/rate", response_model=schemas.Song)
-def rate_song(song_id: str, rating_data: schemas.RatingUpdate, db: Session = Depends(get_db)):
+@router.post("/ratings", response_model=schemas.Rating)
+def create_or_update_rating(rating_data: schemas.RatingCreate, db: Session = Depends(get_db)):
     """
-    Update the rating of a song by its ID.
+    Create or update a rating for a song.
     """
-    song = crud.update_star_rating(db, song_id=song_id, rating=rating_data.rating)
-    if song is None:
-        raise HTTPException(status_code=404, detail="Song not found")
-    return song
+    rating = crud.create_or_update_rating(db=db, rating_data=rating_data)
+    return rating
