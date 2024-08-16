@@ -97,6 +97,13 @@ DATABASE_URL=mysql+pymysql://your_user:your_password@localhost/your_database
 ```sql
 CREATE DATABASE your_database;
 ```
+
+- **Update the alembic.ini file with the updated database string**
+
+```bash
+sqlalchemy.url = mysql+pymysql://your_user:your_password@localhost/your_database
+```
+
 - **Run database migrations:**
 
 ```bash
